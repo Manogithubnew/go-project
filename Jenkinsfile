@@ -28,7 +28,7 @@ pipeline {
        stage('Checkout'){
            steps{
                echo "checking out repo"
-               git url: 'https://github.com/Manogithubnew/gopipe.git', branch: 'main',
+               git url: 'https://github.com/Manogithubnew/go-project.git', branch: 'main',
                credentialsId: "${GITHUB_CREDENTIALS}"
            }
        }
@@ -59,23 +59,24 @@ pipeline {
                }
            }
        }
-       stage('push to docker hub'){
-           steps{
-               echo "pushing to docker hub"
-               script{
-                   docker.withRegistry('https://registry.hub.docker.com', 'doocker-hub-credential') {
-                       docker.image("${DOCKER_IMAGE}:${env.BUILD_ID}").push()
-                   }
-               }
-               echo "done"
-           }
-       }
-   }
-
-
-   post {
-       always{
-           cleanWs()
-       }
-   }
+       stage ("Upload Artifact") {
+            steps {
+                nexusArtifactUploader(
+                  nexusVersion: 'nexus3',
+                  protocol: 'http',
+                  nexusUrl: "${NEXUS_IP}:${NEXUS_PORT}",  
+                  groupId: 'QA',
+                  version: "${env.BUILD_ID}-${env.BUILD_TIMESTAMP}",
+                  repository: "${RELEASE_REPO}",
+                  credentialsId: "${NEXUS_LOGIN}", 
+                  artifacts: [
+                    [artifactId: 'vproapp',
+                     classifier: '',
+                     file: 'target/vprofile-v2.war',
+                     type: 'war']
+                  ]
+                )
+            }
+        }
+    }
 }
