@@ -13,7 +13,7 @@ pipeline {
        SNAP_REPO = 'vprofile-snapshot'
        NEXUS_USER = 'admin'
        NEXUS_PASS = 'admin@123'
-       RELEASE_REPO = 'vprofile-release'
+       RELEASE_REPO = 'docker_nexus'
        CENTRAL_REPO = 'vpro-maven-central'
        NEXUS_IP = '192.168.29.68'
        NEXUS_PORT = '8081'
