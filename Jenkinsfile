@@ -18,7 +18,7 @@ pipeline {
        NEXUS_IP = '192.168.29.68'
        NEXUS_PORT = '8081'
        NEXUS_GRP_REPO = 'vpro-maven-group'
-       NEXUS_LOGIN = 'nexuslogin'
+       Nexus_Admin_Credentials = 'nexuslogin'
        SONARSERVER = 'sonarserver'
        SONARSCANNER = 'sonarscanner'
        NEXUS_CREDS = credentials('nexuslogin')
