@@ -21,6 +21,8 @@ pipeline {
        NEXUS_LOGIN = 'nexuslogin'
        SONARSERVER = 'sonarserver'
        SONARSCANNER = 'sonarscanner'
+       NEXUS_CREDS = credentials('nexuslogin')
+       NEXUS_DOCKER_REPO = 'localhost:8081'
    }
 
 
@@ -59,23 +61,22 @@ pipeline {
                }
            }
        }
-       stage ("Upload Artifact") {
+       stage('Docker Login') {
             steps {
-                nexusArtifactUploader(
-                  nexusVersion: 'nexus3',
-                  protocol: 'http',
-                  nexusUrl: "${NEXUS_IP}:${NEXUS_PORT}",  
-                  groupId: 'QA',
-                  version: "${env.BUILD_ID}-${env.BUILD_TIMESTAMP}",
-                  repository: "${RELEASE_REPO}",
-                  credentialsId: "${NEXUS_LOGIN}", 
-                  artifacts: [
-                    [artifactId: 'vproapp',
-                     classifier: '',
-                     file: 'target/vprofile-v2.war',
-                     type: 'war']
-                  ]
-                )
+                echo 'Nexus Docker Repository Login'
+                script{
+                    withCredentials([usernamePassword(credentialsId: 'nexus_creds', usernameVariable: 'USER', passwordVariable: 'PASS' )]){
+                       sh ' echo $PASS | docker login -u $USER --password-stdin $NEXUS_DOCKER_REPO'
+                    }
+                   
+                }
+            }
+        }
+
+        stage('Docker Push') {
+            steps {
+                echo 'Pushing Imgaet to docker hub'
+                sh 'docker push $NEXUS_DOCKER_REPO/fakeweb:$BUILD_NUMBER'
             }
         }
     }
