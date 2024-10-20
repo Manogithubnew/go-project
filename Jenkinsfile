@@ -61,23 +61,18 @@ pipeline {
                }
            }
        }
-       stage('Docker Login') {
-            steps {
-                echo 'Nexus Docker Repository Login'
-                script{
-                    withCredentials([usernamePassword(credentialsId: 'nexus_creds', usernameVariable: 'USER', passwordVariable: 'PASS' )]){
-                       sh ' echo $PASS | docker login -u $USER --password-stdin $NEXUS_DOCKER_REPO'
-                    }
-                   
-                }
-            }
-        }
-
-        stage('Docker Push') {
-            steps {
-                echo 'Pushing Imgaet to docker hub'
-                sh 'docker push $NEXUS_DOCKER_REPO/fakeweb:$BUILD_NUMBER'
-            }
-        }
-    }
+       stage('Push to Nexus') {
+           steps {
+               script {
+                   def nexusCreds = withCredentials([usernamePassword(credentialsId: 'Nexus_Admin_Credentials', usernameVariable: 'NEXUS_USERNAME', passwordVariable: 'NEXUS_PASSWORD')]) {
+                       return [username: NEXUS_USERNAME, password: NEXUS_PASSWORD]
+                   }
+            
+                   sh "echo '${nexusCreds.password}' | docker login -u ${nexusCreds.username} --password-stdin http://nexus:8082/repository/calculator-docker-repo/"
+                   sh 'docker tag calculator_image:latest http://nexus:8082/repository/calculator-docker-repo:latest'
+                   sh 'docker push http://nexus:8082/repository/calculator-docker-repo:latest'
+               }
+           }
+       }
+   }
 }
