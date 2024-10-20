@@ -11,8 +11,8 @@ pipeline {
        GITHUB_CREDENTIALS = 'github'
        SONAR_TOKEN = credentials('sonartoken')
        SNAP_REPO = 'vprofile-snapshot'
-       NEXUS_USER = 'admin'
-       NEXUS_PASS = 'admin@123'
+       NEXUS_USERNAME = 'admin'
+       NEXUS_PASSWORD = 'admin@123'
        RELEASE_REPO = 'docker_nexus'
        CENTRAL_REPO = 'vpro-maven-central'
        NEXUS_IP = '192.168.29.68'
@@ -68,9 +68,9 @@ pipeline {
                        return [username: NEXUS_USERNAME, password: NEXUS_PASSWORD]
                    }
             
-                   sh "echo '${nexusCreds.password}' | docker login -u ${nexusCreds.username} --password-stdin http://nexus:8082/repository/calculator-docker-repo/"
-                   sh 'docker tag calculator_image:latest http://nexus:8082/repository/calculator-docker-repo:latest'
-                   sh 'docker push http://nexus:8082/repository/calculator-docker-repo:latest'
+                   sh "echo '${nexusCreds.password}' | docker login -u ${nexusCreds.username} --password-stdin http://nexus:8081/repository/docker_nexus/"
+                   sh 'docker tag ${DOCKER_IMAGE}:${env.BUILD_ID} http://nexus:8081/repository/docker_nexus:latest'
+                   sh 'docker push http://nexus:8081/repository/docker_nexus:latest'
                }
            }
        }
