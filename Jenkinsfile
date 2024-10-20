@@ -1,57 +1,81 @@
 pipeline {
-    agent any
-    environment {
-        SSH_CREDENTIALS_ID = 'bc013f38-40d9-4731-8ed1-23c56055cc0f' // Replace with your SSH credential ID from you jenkin dashboard
-    }
-    stages {
-        stage('Checkout') {
-            steps {
-                // Pull the latest code from the Git repository
-                git branch: 'master', url: 'https://github.com/novrian6/api_go_jenkins_demo.git'
+   agent any
+
+
+   tools {
+      go '1.23.2'
+   }
+   environment {
+       DOCKERHUB_CREDENTIALS = credentials('doocker-hub-credential')
+       DOCKER_IMAGE = 'mrthcldock/tektondemo'
+       GITHUB_CREDENTIALS = 'github'
+       SONAR_TOKEN = credentials('sonartoken')
+       SNAP_REPO = 'vprofile-snapshot'
+       NEXUS_USER = 'admin'
+       NEXUS_PASS = 'admin@123'
+       RELEASE_REPO = 'vprofile-release'
+       CENTRAL_REPO = 'vpro-maven-central'
+       NEXUS_IP = '192.168.29.68'
+       NEXUS_PORT = '8081'
+       NEXUS_GRP_REPO = 'vpro-maven-group'
+       NEXUS_LOGIN = 'nexuslogin'
+       SONARSERVER = 'sonarserver'
+       SONARSCANNER = 'sonarscanner'
+   }
+
+
+   stages{
+       stage('Checkout'){
+           steps{
+               echo "checking out repo"
+               git url: 'https://github.com/Manogithubnew/gopipe.git', branch: 'main',
+               credentialsId: "${GITHUB_CREDENTIALS}"
+           }
+       }
+       stage ('Sonar Analysis') {
+            environment {
+                scannerHome = tool "${SONARSCANNER}" 
             }
-        }
-        stage('Build') {
             steps {
-                // Build the Go application
-                sh 'go build -o hello-world-api'
-            }
-        }
-        stage('Test') {
-            steps {
-                // Run Go unit tests
-                sh 'go test -v ./...'
-            }
-        }
-        stage('Deploy') {
-            steps {
-                sshagent(credentials: [SSH_CREDENTIALS_ID]) {
-                    script {
-                        // Commands to be executed on the remote server
-                        def remoteCommands = '''
-                        # Stop existing Go binary process if running
-                        pkill hello-world-api || true
-                        # Create target directory
-                        mkdir -p ~/go_apps/production
-                        # Remove old binary if exists
-                        rm -f ~/go_apps/production/hello-world-api
-                        # Copy the new binary
-                        scp -o StrictHostKeyChecking=no -i ${SSH_AUTH_SOCK} hello-world-api nn@172.16.137.133:~/go_apps/production/
-                        # Change directory and make the binary executable
-                        chmod +x ~/go_apps/production/hello-world-api
-                        cd ~/go_apps/production
-                        # Run the new binary in the background
-                        nohup ./hello-world-api > /dev/null 2>&1 &
-                        '''
-                        // Execute commands on the remote server
-                        sh "ssh -o StrictHostKeyChecking=no nn@172.16.137.133 '${remoteCommands}'"
-                    }
-                }
-            }
-        }
-    }
-    post {
-        always {
-            cleanWs()
-        }
-    }
+              withSonarQubeEnv("${SONARSERVER}") {
+                 sh '''${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=vprofile \
+                     -Dsonar.projectName=vprofile-repo \
+                     -Dsonar.projectVersion=1.0 \
+                     -Dsonar.sources=/var/lib/jenkins/workspace/mrt-ci-pipeline-java/ \
+                     -Dsonar.java.binaries=target/test-classes/com/visualpathit/account/controllerTest/ \
+                     -Dsonar.exclusions=**/*.js,**/*.ts,**/*.css,**/*.jps \
+                     -Dsonar.junit.reportsPath=target/surefire-reports/ \
+                     -Dsonar.jacoco.reportsPath=target/jacoco.exec \
+                     -Dsonar.java.checkstyle.reportPaths=target/checkstyle-result.xml'''
+               }
+           }
+       }
+       stage('Run Docker Build'){
+           steps{
+               script{
+                    echo "starting docker build"
+                    sh "docker build -t ${DOCKER_IMAGE}:${env.BUILD_ID} ."
+                    echo "docker built successfully"
+               }
+           }
+       }
+       stage('push to docker hub'){
+           steps{
+               echo "pushing to docker hub"
+               script{
+                   docker.withRegistry('https://registry.hub.docker.com', 'doocker-hub-credential') {
+                       docker.image("${DOCKER_IMAGE}:${env.BUILD_ID}").push()
+                   }
+               }
+               echo "done"
+           }
+       }
+   }
+
+
+   post {
+       always{
+           cleanWs()
+       }
+   }
 }
