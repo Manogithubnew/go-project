@@ -63,14 +63,14 @@
                }
            }
        }
-       
        stage('Push to Nexus') {
            steps {
                script {
                    docker.withRegistry('http://'+registry, registryCredentials ) {
-                   dockerImage.push('latest')
-              }
+                   dockerImage.push('latest')'
+               }
            }
        }
    }
 }
+     
