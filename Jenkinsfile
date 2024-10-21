@@ -64,13 +64,8 @@ pipeline {
        stage('Push to Nexus') {
            steps {
                script {
-                   def nexusCreds = withCredentials([usernamePassword(credentialsId: 'Nexus_Admin_Credentials', usernameVariable: 'NEXUS_USERNAME', passwordVariable: 'NEXUS_PASSWORD')]) {
-                       return [username: NEXUS_USERNAME, password: NEXUS_PASSWORD]
-                   }
-            
-                   sh "echo '${nexusCreds.password}' | docker login -u ${nexusCreds.username} --password-stdin http://nexus:8081/repository/docker_nexus/"
-                   sh 'docker tag ${DOCKER_IMAGE}:${env.BUILD_ID} http://nexus:8081/repository/docker_nexus:latest'
-                   sh 'docker push http://nexus:8081/repository/docker_nexus:latest'
+                   docker.withRegistry('https://registry.hub.docker.com', 'doocker-hub-credential') {
+                   dockerImage.push('latest')
                }
            }
        }
