@@ -22,7 +22,7 @@ pipeline {
        SONARSERVER = 'sonarserver'
        SONARSCANNER = 'sonarscanner'
        NEXUS_CREDS = credentials('nexuslogin')
-       NEXUS_DOCKER_REPO = '192.168.29.68:8085'
+       NEXUS_DOCKER_REPO = 'localhost:8081'
    }
 
 
