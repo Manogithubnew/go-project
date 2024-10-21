@@ -63,7 +63,7 @@
        stage('Push to Nexus') {
            steps {
                script {
-                   def nexusCreds = withCredentials([usernamePassword(credentialsId: 'Nexus_Admin_Credentials', usernameVariable: 'NEXUS_USERNAME', passwordVariable: 'NEXUS_PASSWORD')]) {
+                   def nexusCreds = withCredentials([usernamePassword(credentialsId: 'nexuslogin', usernameVariable: 'NEXUS_USERNAME', passwordVariable: 'NEXUS_PASSWORD')]) {
                        return [username: NEXUS_USERNAME, password: NEXUS_PASSWORD]
                    }
             
