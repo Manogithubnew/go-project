@@ -64,8 +64,8 @@ pipeline {
        stage('Push to Nexus') {
            steps {
                script {
-                   docker.withRegistry('http://192.168.29.68:8081', 'nexuslogin') {
-                   dockerImage.push('latest')
+                       docker.withRegistry('http://192.168.29.68:8081', 'nexuslogin') {
+                       dockerImage.push('latest')
                }
            }
        }
