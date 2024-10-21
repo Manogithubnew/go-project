@@ -64,7 +64,7 @@ pipeline {
        stage('Push to Nexus') {
            steps {
                script {
-                   docker.withRegistry('https://registry.hub.docker.com', 'doocker-hub-credential') {
+                   docker.withRegistry('http://192.168.29.68:8081', 'nexuslogin') {
                    dockerImage.push('latest')
                }
            }
