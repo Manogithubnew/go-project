@@ -65,7 +65,7 @@ pipeline {
             steps {
                 echo 'Nexus Docker Repository Login'
                 script{
-                    withCredentials([usernamePassword(credentialsId: 'nexus_creds', usernameVariable: 'USER', passwordVariable: 'PASS' )]){
+                    withCredentials([usernamePassword(credentialsId: 'nexuslogin', usernameVariable: 'USER', passwordVariable: 'PASS' )]){
                        sh ' echo $PASS | docker login -u $USER --password-stdin $NEXUS_DOCKER_REPO'
                     }
                    
