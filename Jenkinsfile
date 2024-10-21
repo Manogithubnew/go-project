@@ -22,7 +22,7 @@ pipeline {
        SONARSERVER = 'sonarserver'
        SONARSCANNER = 'sonarscanner'
        NEXUS_CREDS = credentials('nexuslogin')
-       NEXUS_DOCKER_REPO = 'localhost:8085'
+       NEXUS_DOCKER_REPO = 'docker-nexus'
    }
 
 
@@ -76,7 +76,7 @@ pipeline {
         stage('Docker Push') {
             steps {
                 echo 'Pushing Imgaet to docker hub'
-                sh 'docker push $NEXUS_DOCKER_REPO/fakeweb:$BUILD_NUMBER'
+                sh 'docker push $NEXUS_DOCKER_REPO/fakeweb:$BUILD_ID'
             }
         }
     }
