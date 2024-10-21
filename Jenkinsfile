@@ -1,4 +1,4 @@
-pipeline {
+ pipeline {
    agent any
 
 
@@ -7,7 +7,7 @@ pipeline {
    }
    environment {
        DOCKERHUB_CREDENTIALS = credentials('doocker-hub-credential')
-       DOCKER_IMAGE = 'fakeweb'
+       DOCKER_IMAGE = 'mrthcldock/tektondemo'
        GITHUB_CREDENTIALS = 'github'
        SONAR_TOKEN = credentials('sonartoken')
        SNAP_REPO = 'vprofile-snapshot'
@@ -18,11 +18,10 @@ pipeline {
        NEXUS_IP = '192.168.29.68'
        NEXUS_PORT = '8081'
        NEXUS_GRP_REPO = 'vpro-maven-group'
-       Nexus_Admin_Credentials = 'nexuslogin'
        SONARSERVER = 'sonarserver'
        SONARSCANNER = 'sonarscanner'
        NEXUS_CREDS = credentials('nexuslogin')
-       NEXUS_DOCKER_REPO = 'docker-nexus'
+       NEXUS_DOCKER_REPO = 'localhost:8081'
    }
 
 
@@ -62,15 +61,17 @@ pipeline {
            }
        }
        stage('Push to Nexus') {
-    steps {
-        script {
-            def nexusCreds = withCredentials([usernamePassword(credentialsId: 'nexuslogin', usernameVariable: 'NEXUS_USERNAME', passwordVariable: 'NEXUS_PASSWORD')]) {
-                return [username: NEXUS_USERNAME, password: NEXUS_PASSWORD]
-            }
+           steps {
+               script {
+                   def nexusCreds = withCredentials([usernamePassword(credentialsId: 'Nexus_Admin_Credentials', usernameVariable: 'NEXUS_USERNAME', passwordVariable: 'NEXUS_PASSWORD')]) {
+                       return [username: NEXUS_USERNAME, password: NEXUS_PASSWORD]
+                   }
             
-            sh "echo '${nexusCreds.password}' | docker login -u ${nexusCreds.username} --password-stdin http://192.168.29.68:8081/repository/docker-nexus/"
-            sh 'docker tag calculator_image:latest http://192.168.29.68:8081/repository/docker-nexus:latest'
-            sh 'docker push http://192.168.29.68:8081/repository/docker-nexus:latest'
-        }
-    }
+                   sh "echo '${nexusCreds.password}' | docker login -u ${nexusCreds.username} --password-stdin http://nexus:8081/repository/docker_nexus/"
+                   sh 'docker tag ${DOCKER_IMAGE}:${env.BUILD_ID} http://nexus:8081/repository/docker_nexus:latest'
+                   sh 'docker push http://nexus:8081/repository/docker_nexus:latest'
+               }
+           }
+       }
+   }
 }
