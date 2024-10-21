@@ -60,11 +60,11 @@
                }
            }
        }
+       
        stage('Push to Nexus') {
            steps {
                script {
-                   def nexusCreds = withCredentials([usernamePassword(credentialsId: 'nexuslogin', usernameVariable: 'NEXUS_USERNAME', passwordVariable: 'NEXUS_PASSWORD')]) {
-                       return [username: NEXUS_USERNAME, password: NEXUS_PASSWORD]
+                   docker.withRegistry('http://192.168.29.68:8081/repository/docker-nexus/', 'nexuslogin') {
                    }
             
                    sh "echo '${nexusCreds.password}' | docker login -u ${nexusCreds.username} --password-stdin http://192.168.29.68:8085/repository/docker-nexus"
