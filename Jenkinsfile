@@ -6,7 +6,7 @@
       go '1.23.2'
    }
    environment {
-       registry = "http://192.168.29.68:8081"
+       registry = "192.168.29.68:8081"
        registryCredentials = "nexuslogin"
        dockerImage = ''
        DOCKERHUB_CREDENTIALS = credentials('doocker-hub-credential')
