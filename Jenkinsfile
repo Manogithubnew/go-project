@@ -6,6 +6,9 @@
       go '1.23.2'
    }
    environment {
+       registry = "http://192.168.29.68:8081"
+       registryCredentials = "nexuslogin"
+       dockerImage = ''
        DOCKERHUB_CREDENTIALS = credentials('doocker-hub-credential')
        DOCKER_IMAGE = 'mrthcldock/tektondemo'
        GITHUB_CREDENTIALS = 'github'
@@ -64,12 +67,8 @@
        stage('Push to Nexus') {
            steps {
                script {
-                   docker.withRegistry('http://192.168.29.68:8081/repository/docker-nexus/', 'nexuslogin') {
-                   }
-            
-                   sh "echo '${nexusCreds.password}' | docker login -u ${nexusCreds.username} --password-stdin http://192.168.29.68:8085/repository/docker-nexus"
-                   sh 'docker tag ${DOCKER_IMAGE}:${env.BUILD_ID} http://192.168.29.68:8085/repository/docker-nexus:latest'
-                   sh 'docker push http://192.168.29.68:8085/repository/docker-nexus:latest'
+                   docker.withRegistry('http://'+registry, registryCredentials ) {
+                   dockerImage.push('latest')
                }
            }
        }
