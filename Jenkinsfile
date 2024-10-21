@@ -61,23 +61,16 @@ pipeline {
                }
            }
        }
-       stage('Docker Login') {
-            steps {
-                echo 'Nexus Docker Repository Login'
-                script{
-                    withCredentials([usernamePassword(credentialsId: 'nexuslogin', usernameVariable: 'USER', passwordVariable: 'PASS' )]){
-                       sh ' echo $PASS | docker login -u $USER --password-stdin $NEXUS_DOCKER_REPO'
-                    }
-                   
-                }
+       stage('Push to Nexus') {
+    steps {
+        script {
+            def nexusCreds = withCredentials([usernamePassword(credentialsId: 'nexuslogin', usernameVariable: 'NEXUS_USERNAME', passwordVariable: 'NEXUS_PASSWORD')]) {
+                return [username: NEXUS_USERNAME, password: NEXUS_PASSWORD]
             }
-        }
-
-        stage('Docker Push') {
-            steps {
-                echo 'Pushing Imgaet to docker hub'
-                sh 'docker push $NEXUS_DOCKER_REPO/fakeweb:$BUILD_ID'
-            }
+            
+            sh "echo '${nexusCreds.password}' | docker login -u ${nexusCreds.username} --password-stdin http://192.168.29.68:8081/repository/docker-nexus/"
+            sh 'docker tag calculator_image:latest http://192.168.29.68:8081/repository/docker-nexus:latest'
+            sh 'docker push http://192.168.29.68:8081/repository/docker-nexus:latest'
         }
     }
 }
