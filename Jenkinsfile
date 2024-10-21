@@ -67,9 +67,9 @@
                        return [username: NEXUS_USERNAME, password: NEXUS_PASSWORD]
                    }
             
-                   sh "echo '${nexusCreds.password}' | docker login -u ${nexusCreds.username} --password-stdin http://192.168.29.68:8081/repository/docker-nexus"
-                   sh 'docker tag ${DOCKER_IMAGE}:${env.BUILD_ID} http://192.168.29.68:8081/repository/docker-nexus:latest'
-                   sh 'docker push http://192.168.29.68:8081/repository/docker-nexus:latest'
+                   sh "echo '${nexusCreds.password}' | docker login -u ${nexusCreds.username} --password-stdin http://192.168.29.68:8085/repository/docker-nexus"
+                   sh 'docker tag ${DOCKER_IMAGE}:${env.BUILD_ID} http://192.168.29.68:8085/repository/docker-nexus:latest'
+                   sh 'docker push http://192.168.29.68:8085/repository/docker-nexus:latest'
                }
            }
        }
